@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -25,10 +26,12 @@ import javax.swing.DefaultListModel;
  * @author Miguel Matul <https://github.com/MigueMat4>
  */
 public class frmMain extends javax.swing.JFrame {
-
+      Proceso proceso = new Proceso("Sistema Operativo");
+   
     private final Memoria RAM = new Memoria();
     private final Graphics g;
     private final DefaultListModel<String> procesos_en_disco = new DefaultListModel<>();
+    private static Semaphore mutex = new Semaphore(1,true);
 
     /**
      * Creates new form frmMain
@@ -40,6 +43,7 @@ public class frmMain extends javax.swing.JFrame {
         pnlMemoria.paintComponents(g);
         txtTablaProcesos.setEditable(false);
         listProcesos.setModel(procesos_en_disco);
+       proceso.start();
     }
 
     public class Proceso extends Thread {
@@ -71,24 +75,36 @@ public class frmMain extends javax.swing.JFrame {
             } catch (IOException ex) {
                 Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
             }
+           
+            
             String texto = "";
             System.out.println("Proceso " + this.nombre + " entrando a la región crítica");
+            //VARIABLES COMPARTIDAS
+            // tope =
+            //siguiente_slot_libre
             int espacio_libre = RAM.tope - RAM.siguiente_slot_libre;// slot_libre es el espacio que ocupa actualmente el proceso
             System.out.println("THE RAM" + RAM.siguiente_slot_libre);
             this.base = RAM.siguiente_slot_libre; // base guarda el tamaño actual del documento
-            System.out.println("LONGITUD--------" + longitud);
+           // System.out.println("LONGITUD--------" + longitud);
             for (int i = 0; i < this.longitud; i++) { //
                 System.out.println("Entra RAM" + RAM.siguiente_slot_libre);
-                RAM.slots[i] = "Instrucción de " + this.nombre; // slots guarda en el tamaño actual de cada txt - 3 en arreglo posición 2 
+               // RAM.slots[i] = "Instrucción de " + this.nombre; // slots guarda en el tamaño actual de cada txt - 3 en arreglo posición 2 
 
                 System.out.println("Aumenta" + RAM.siguiente_slot_libre);
-                /*System.out.println("Entra RAM"+  RAM.siguiente_slot_libre);
-                RAM.slots[RAM.siguiente_slot_libre] = "Instrucción de " + this.nombre; // slots guarda en el tamaño actual de cada txt - 3 en arreglo posición 2 
+                System.out.println("Entra RAM"+  RAM.siguiente_slot_libre);
+                RAM.slots[i] = "Instrucción de " + this.nombre; // slots guarda en el tamaño actual de cada txt - 3 en arreglo posición 2 
                 this.limite = RAM.siguiente_slot_libre;
                 System.out.println("Va a limite "+ RAM.siguiente_slot_libre);
                 RAM.siguiente_slot_libre++;
-                System.out.println("Aumenta"+ RAM.siguiente_slot_libre);*/
+                System.out.println("Aumenta"+ RAM.siguiente_slot_libre);
             }
+            
+             
+          /*  if(RAM.siguiente_slot_libre>320){
+                
+                procesos_en_disco.addElement(nombre);
+            }*/
+            
             RAM.procesos_cargados.add(this);
             texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
             System.out.println(texto);
@@ -117,7 +133,9 @@ public class frmMain extends javax.swing.JFrame {
             }
         }
     }
-
+    private class Demonio extends Thread{
+    
+}
     public class Memoria {
 
         public String[] slots = new String[320];
@@ -125,6 +143,8 @@ public class frmMain extends javax.swing.JFrame {
         private final int tope = 319;
         public List<Proceso> procesos_cargados = new ArrayList<>();
         // Lista con estructura que tiene nodos que guardan las posiciones iniciales y finales de los espacios libres
+        
+        
 
         public Memoria() {
             for (int i = 0; i < 320; i++) {
@@ -139,6 +159,7 @@ public class frmMain extends javax.swing.JFrame {
             while (iterator.hasNext()) {
                 entro = true;
                 Proceso process = (Proceso) iterator.next();
+              
                 if (tamanio >= process.longitud / 10) {
 
                     g.setColor(Color.BLACK);
@@ -173,8 +194,9 @@ public class frmMain extends javax.swing.JFrame {
                     int x = val - process.longitud;
                     System.out.println("dato"+ dato);
                     g.drawString(tamanio + "K", 60, 320-(tamanio*10)/2);
-
+                    procesos_en_disco.addElement(process.nombre);
                 }
+              
             }
 
             if (entro == false) {
@@ -186,6 +208,9 @@ public class frmMain extends javax.swing.JFrame {
                 g.drawString(32 + "K", 60, 160);
 
             }
+            
+            
+            
         }
     }
 
@@ -354,16 +379,20 @@ public class frmMain extends javax.swing.JFrame {
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // Creación de 10 procesos para cargar en memoria principal
-        Proceso proceso = new Proceso("Sistema Operativo");
-        proceso.start();
+      
         try {
+            
+            
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(frmMain.class.getName()).log(Level.SEVERE, null, ex);
         }
+     //   procesos_en_disco.addElement("fdsaf");
+        
         Proceso user_process;
         char letra = 'A';
         for (int i = 0; i < 10; i++) {
+            
             user_process = new Proceso(String.valueOf(letra));
             user_process.start();
             letra++;
