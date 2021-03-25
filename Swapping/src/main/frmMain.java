@@ -133,18 +133,24 @@ public class frmMain extends javax.swing.JFrame {
         }
 
         public void graficarMemoria() {
-            int val = 0, dato = 1;
+            int val = 0, dato = 1, tamanio=32;
+            boolean entro = false;
             Iterator<Proceso> iterator = RAM.procesos_cargados.iterator();
             while (iterator.hasNext()) {
+                entro = true;
                 Proceso process = (Proceso) iterator.next();
-                g.setColor(Color.BLACK);
-                g.drawRect(0, dato, 170, process.longitud - 1);
-                g.setColor(Color.WHITE);
-                g.fillRect(0, dato, 170, process.longitud - 1);
-                g.setColor(Color.BLACK);
-                dato = dato + process.longitud;
-                val = val + process.longitud / 10;
-                if (val < 32) {
+                if (tamanio >= process.longitud / 10) {
+
+                    g.setColor(Color.BLACK);
+                    g.drawRect(0, dato, 170, process.longitud - 1);
+                    g.setColor(Color.WHITE);
+                    g.fillRect(0, dato, 170, process.longitud - 1);
+                    g.setColor(Color.BLACK);
+                    dato = dato + process.longitud;
+                    val = val + process.longitud / 10;
+                    tamanio = 32 - val;
+                    System.out.println("tamani" + tamanio);
+                    System.out.println("proces" + process.longitud);
                     if (process.nombre.equals("Sistema Operativo")) {
                         g.drawString("Sistema Operativo", 40, 15);
                     } else {
@@ -165,9 +171,20 @@ public class frmMain extends javax.swing.JFrame {
                     g.setColor(Color.BLACK);
                     dato = dato + process.longitud;
                     int x = val - process.longitud;
-                    g.drawString(x + "K", 60, dato - process.longitud / 2);
+                    System.out.println("dato"+ dato);
+                    g.drawString(tamanio + "K", 60, 320-(tamanio*10)/2);
 
                 }
+            }
+
+            if (entro == false) {
+                g.setColor(Color.BLACK);
+                g.drawRect(0, 320, 170, 320);
+                g.setColor(Color.GRAY);
+                g.fillRect(0, 320, 170, 320);
+                g.setColor(Color.BLACK);
+                g.drawString(32 + "K", 60, 160);
+
             }
         }
     }
