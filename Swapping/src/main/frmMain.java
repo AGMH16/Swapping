@@ -66,6 +66,7 @@ public class frmMain extends javax.swing.JFrame {
 
         @Override
         public void run() {
+            boolean xx=true;
             File process_logs = new File(this.nombre + "_logs.txt");
             FileWriter primer_registro;
             try {
@@ -86,7 +87,9 @@ public class frmMain extends javax.swing.JFrame {
             System.out.println("THE RAM" + RAM.siguiente_slot_libre);
             this.base = RAM.siguiente_slot_libre; // base guarda el tamaño actual del documento
            // System.out.println("LONGITUD--------" + longitud);
-            for (int i = 0; i < this.longitud; i++) { //
+            
+           
+           for (int i = 0; i < this.longitud; i++) { //
                 System.out.println("Entra RAM" + RAM.siguiente_slot_libre);
                // RAM.slots[i] = "Instrucción de " + this.nombre; // slots guarda en el tamaño actual de cada txt - 3 en arreglo posición 2 
 
@@ -97,14 +100,16 @@ public class frmMain extends javax.swing.JFrame {
                 System.out.println("Va a limite "+ RAM.siguiente_slot_libre);
                 RAM.siguiente_slot_libre++;
                 System.out.println("Aumenta"+ RAM.siguiente_slot_libre);
-            }
-            
-             
-          /*  if(RAM.siguiente_slot_libre>320){
-                
-                procesos_en_disco.addElement(nombre);
-            }*/
-            
+                xx= false;
+           }
+           
+          try{
+              mutex.acquire();
+          }catch(InterruptedException ex){
+              System.out.println(ex);
+          }
+          
+          mutex.release();
             RAM.procesos_cargados.add(this);
             texto = this.nombre + " - Registro base: " + (this.base / 10 + 1) + "K";
             System.out.println(texto);
@@ -133,9 +138,6 @@ public class frmMain extends javax.swing.JFrame {
             }
         }
     }
-    private class Demonio extends Thread{
-    
-}
     public class Memoria {
 
         public String[] slots = new String[320];
